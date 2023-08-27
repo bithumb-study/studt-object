@@ -1,4 +1,4 @@
-package study_object.hshsy.ticket_box.base;
+package study_object.ticket_box.base;
 
 public class Ticket {
     private Long fee;

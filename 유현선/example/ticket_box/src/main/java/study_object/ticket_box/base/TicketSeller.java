@@ -1,4 +1,4 @@
-package study_object.hshsy.ticket_box.base;
+package study_object.ticket_box.base;
 
 public class TicketSeller {
     public TicketOffice ticketOffice;
