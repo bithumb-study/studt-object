@@ -178,7 +178,7 @@ public class Theater {
 
 ### 예상을 빗나가는 코드
 
-- Theater의  enter() 메서드가 수행하는 일
+- Theater의 enter() 메서드가 수행하는 일
     - 소극장은 관람객의 가방을 열어 그 안에 초대장이 들어 있는지 살펴본다. 가방 안에 초대장이 들어 있으면 판매원은 매표소에 보관돼 있는 티켓을 관람객의 가방 안으로 옮긴다. 가방 안에 초대장이 들어 있지 않다면 관람객의 가방에서 티켓 금액만큼의 현금을 꺼내 매표소에 적립한 후에 매표소에 보관돼 있는 티켓을 관람객의 가방 안으로 옮긴다.
 - 위의 내용대로라면 관람객과 판매원이 소극장의 통제를 받는 수동적인 존재가 되버림!
 - 우리의 상식과는 너무나 다르기에 코드를 읽는 사람과 제대로 의사소통을 할 수 없음
@@ -260,7 +260,7 @@ public class Audience {
         if (bag.hasInvitation()) {
             bag.setTicket(ticket);
             return 0L;
-        } else {
+        } else {    
             bag.setTicket(ticket);
             bag.minusAmount(ticket.getFee());
             return ticket.getFee();
