@@ -1,0 +1,10 @@
+package com.object.ch01.before.domain;
+
+public class Ticket {
+
+    private Long fee;
+
+    public Long getFee() {
+        return fee;
+    }
+}
