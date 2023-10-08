@@ -192,3 +192,279 @@ screening.calculateFee(audienceCount);
 - 구현과 관련된 모든 정보를 캡슐화 하고 객체의 퍼블릭 인터페이스에는 협력과 관련된 의도만을 표현해야한다.
 
 
+## 📖 6.3 원칙의 함정
+
+원칙이 현재 상황에 부적합하다고 판단된다면 과감하게 원칙을 무시하라.
+원칙을 아는것보다 더 중요한 것은 언제 원칙이 유용하고 언제 유용하지 않은지를 판단할수 있는 능력을 기르는것
+
+### 🔖 6.3.1 디미터 법칙은 하나의 도트를 강제하는 규칙이 아니다.
+
+```java
+public class OneDot{
+    public void example(){
+      IntStream.of(1, 15, 20, 3, 9).filter(x -> x > 10).distinct().count();
+
+    }
+  
+}
+```
+
+위 코드에서 of, filter, distinct 메서드는 모두 IntStream이라는 동일한 클래스의 인스턴스를 반환한다.
+
+이코드는 디미터의 법칙을 위반하지 않는다.
+
+디미터의 법칙은 결합도와 관련된 것이며, 이결합도가 문제가 되는것은 객체의 내부 구조가 외부 노출되는 경우로 한정된다.
+
+하나이상의 도트를 사용하는 모든 케이스가 디미터의 법칙을 위반하는것은 아니다.
+
+기차 충돌 처럼 보이는 코드라도 객체의 내부 구현에 대한 어떤 정보도 외부로 노출하지 않는다면 그것은 디미터 법칙응 준수한코드이다.
+
+이 메서드들은 객체의 내부에 어떤 내용도 묻지않고 그저 객체를 다른 객체로 변환하는 작업을 하므로 묻지 말고 시켜라 원칙을 위반하지도 않는다.
+
+### 🔖 6.3.2 결합도와 응집도의 충돌 
+
+객체의 상태를 물어본 후 반환된 상태를 기반으로 결정을 내리고 그 결정에 따라 객체의 상태를 변경하는 코드는 
+묻지말고 시켜라 스타일로 변경 해야 한다.
+
+위임 메서드를 통해 객체의 내부 구조를 감추는 것은 협력에 참여하는 객체듫의 결합도를 낮출 수 있는 동시에 객체의
+응집도를 높일수 있는 가장 효과적인 방법이다.
+
+하지만 묻지 말고 시켜라와 디미터 법칙을 준수하는것이 항상 긍정적이진 않는다.
+- 모든 상황에서 맹목적으로 위임 메서드를 추가하면 같은 퍼블릭 인터페이스 안에 어울리지 않는 오퍼레이션이 공존하게된다.
+결과적으로 객체는 상관없는 책임을 한번에 떠안아 응집도가 낮아진다.
+- 클래스는 하나의 변경점만 가져야 한다.
+서로 상관없는 책임들이 뭉쳐있는 클래스는 응집도가 낮고 작은 변경으로 쉽게 무너진다.
+
+디미터 법칠의 위반 여부는 묻는 대상이 객체인지, 자료구조인지에 달려있다.
+- 객체는 내부구조를 숨겨야 하므로 디미터 법칙을 따르는 것이 좋지만 자료구조라면 당연히 내부를 노출해야 하므로
+디미터 법칙을 적용할 필요가 없다.
+
+설계는 트레이드오프의 산물 
+- 원칙이 적절한 상황과 부적절한 상황을 판단
+- 소프트웨어 설계의 존재하는 몇안되는 법칙 "경우에 따라 다르다" 를 명심
+
+## 📖 6.4 명령-쿼리 분리 원칙
+
+#### 질문이 답변을 수정하면 안된다.
+
+- 퍼블릭 인터페이스에 오퍼레이션을 정의할때 참고하는 지침을 제공
+- 오퍼레이션은 부수효과를 발생시키는 명령이거나 부수효과를 발생시키지 않는 쿼리 중 하나여야 한다.
+
+1. 객체의 상태를 변경하는 명령은 반환값을 가질수 없다.
+2. 객체의 정보를 반환하는 쿼리는 상태를 변경할 수 없다.
+
+- 루틴
+  - 어떤 절차를 묶어 호출 가능하도록 이름을 부여한 기능 모듈
+  - 프로시저 와 함수로 구분
+
+
+- 프로시저
+  - 정채진 절차에 따라 내부의 상태를 변경하는 루틴의 종류
+  - 부수효과를 발생시킬수 있지만 값을 반환할 수 없다.
+  - 명령과 동일
+    - 객체의 상태를 수정하는 오퍼레이션
+
+
+- 함수
+  - 어떤 절차에 따라 필요한 값을 계선해서 반환하는 루틴의 종류
+  - 값을 반환할 수 있지만 부수효과를 발생시킬수 없다.
+  - 쿼리와 동일
+    - 객체와 관련된 정보를 반환하는 오퍼레이션
+    
+### 🔖 6.4.1 반복 일정의 명령과 쿼리 분리하기
+
+특정일자에 발생하는 사건
+```java
+@AllArgsConstructor
+public class Event {
+    private String subject;
+    private LocalDateTime from;
+    private Duration duration;
+}
+```
+
+2019-05-08 10:30 분에 열리는 회의
+```java
+public class Example4_1 {
+  public static void main() {
+    Event meeting = new Event("회의 ",
+            LocalDateTime.of(2019, 5, 8, 10, 30),
+            Duration.ofMinutes(30));
+  }
+
+}
+
+```
+
+```java
+@Getter
+@AllArgsConstructor
+public class RecurringSchedule {
+    private String subject;
+    private DayOfWeek dayOfWeek;
+    private LocalTime from;
+    private Duration duration;
+    
+}
+```
+```java
+public class Example4_1 {
+    public static void main() {
+        Event meeting = new Event("회의 ", LocalDateTime.of(2019, 5, 8, 10, 30), Duration.ofMinutes(30));
+        
+        //매주 수요일 10시30분 부터 30분동안 열리는 회의
+        RecurringSchedule schedule = new RecurringSchedule("회의", DayOfWeek.WEDNESDAY, LocalTime.of(10,30),Duration.ofMinutes(30));
+
+        //버그가 발생 false 후 true를 반환
+        assert meeting.isSatisfied(schedule) == false;
+        assert meeting.isSatisfied(schedule) == true;
+
+    }
+
+}
+```
+
+```java
+@AllArgsConstructor
+public class Event {
+    private String subject;
+    private LocalDateTime from;
+    private Duration duration;
+
+    public boolean isSatisfied(RecurringSchedule schedule) {
+        if (from.getDayOfWeek() != schedule.getDayOfWeek() || 
+                !from.toLocalTime().equals(schedule.getFrom()) ||
+                !duration.equals(schedule.getDuration())) {
+            /**
+             * false 를 반환하기 전에 reschedule 메서드를 호출 
+             * 이 메서드는 event 객체를 수정한다.
+             */
+            reschedule(schedule);
+            return false;
+
+        }
+        return true;
+    }
+    
+    private void reschedule(RecurringSchedule schedule){
+        from = LocalDateTime.of(from.toLocalDate().plusDays(daysDistance(schedule)),schedule.getFrom());
+        duration = schedule.getDuration();
+    }
+    
+    private long daysDistance(RecurringSchedule schedule){
+        return schedule.getDayOfWeek().getValue() - from.getDayOfWeek().getValue();
+    }
+}
+```
+
+버그를 찾기 어려운 이유는 isSatisfied가 명령과 쿼리의 두가지 역할을 동시에 수행하고 있기 때문이다.
+
+명령과 쿼리를 뒤섞으면 실행결과를 예측하기가 어려워 질수있다.
+
+isSatisfied 메서드처럼 겉으로 보기에는 쿼리처럼 보이지만 내부적으로 부수효과를 가지는 메서드는 이해하기 어렵고
+잘못사용하기 쉬우며 버그를 양산하는 경우가 있다.
+
+가장 깔끔한 해결책은 명령과 쿼리를 명확하게 분리하는것이다.
+
+```java
+@AllArgsConstructor
+public class Event {
+    private String subject;
+    private LocalDateTime from;
+    private Duration duration;
+
+    /**
+     *     부수효과를 가지는 순수한 쿼리가 되었다.
+     *     반환값을 돌려주는 메서드는 쿼리이므로 부수효과에 대한 부담이 없다.
+     */
+    public boolean isSatisfied(RecurringSchedule schedule) {
+        return from.getDayOfWeek() == schedule.getDayOfWeek() &&
+                from.toLocalTime().equals(schedule.getFrom()) &&
+                duration.equals(schedule.getDuration());
+    }
+
+    /**
+     * 가시성이 private -> public 이 되었다.
+     */
+    public void reschedule(RecurringSchedule schedule){
+        from = LocalDateTime.of(from.toLocalDate().plusDays(daysDistance(schedule)),schedule.getFrom());
+        duration = schedule.getDuration();
+    }
+
+    private long daysDistance(RecurringSchedule schedule){
+        return schedule.getDayOfWeek().getValue() - from.getDayOfWeek().getValue();
+    }
+}
+```
+
+```java
+public class Example4_1 {
+    public static void main() {
+        Event meeting = new Event("회의 ", LocalDateTime.of(2019, 5, 8, 10, 30), Duration.ofMinutes(30));
+
+        //매주 수요일 10시30분 부터 30분동안 열리는 회의
+        RecurringSchedule schedule = new RecurringSchedule("회의", DayOfWeek.WEDNESDAY, LocalTime.of(10,30),Duration.ofMinutes(30));
+
+        if(!meeting.isSatisfied(schedule)){
+            meeting.reschedule(schedule);
+        }
+
+    }
+
+}
+```
+
+퍼블릭 인터페이스를 설계할 때 부수효과를 가지는 대신 값을 반환하지 않는 명령과 부수효과를 가지지 않는 대신
+값을 반환 하는 쿼리를 분리하면 코드는 예측 가능하고 이해하기 쉬우며 디버깅이 용이한 동시에 유지보수가 수월해질 것이다.
+
+### 🔖 6.4.2 명령-쿼리 분리와 참조 투명성
+
+명령과 쿼리를 분리함으로써 명령형 언어의 틀 안에서 참조 투명성의 장점을 제한적이나마 누릴수 있게 된다.
+
+참조 투명성이라는 특징을 잘 활용하면 버그가 적고, 디버깅이 용이하며, 쿼리의 순서에 따라 실행 결과가 변하지 않는
+코드를 작성 할수 있다.
+
+컴퓨터의 세계와 수학의 세계를 나누는 가장 큰 특징 "부수효과" 존재 유무이다.
+
+프로그램에서 부수효과를 발생시키는 두 가지 대표적인 문법은 대입문(프로시저)과 함수이다.
+
+함수는 내부에 부수효과를 포함할 경우 동일한 인자를 전달하더라도 부수효과에 의해 그 결괏값이 매번 달라질수있다.
+
+참조 투명성
+- 어떤 표현식 e 가 있을때 e 의 값으로 e 가 나타나는 모든 위치를 교체하더라도 결과가 달라지지 않는다는 특성
+
+수학에서 함수는 동일한 입력에 대해 항상 동일한 값을 반환하기에 수학의 함수는 참조투명성을 만족시키는 이상적인 예이다.
+
+어떤 값이 변하지 않는 성질을 불변성이라고 부른다.
+- 어떤 값이 불변한다는 것은 부수효과가 발생하지 않는다는 말과 동일
+
+수학에서의 함수는 어떤 값도 변경하지 않기 때문에 부수효과가 존재하지 않고 부수효과가 없는 불변의 세상에서는
+모든 로직이 참조 투명성을 만족시킨다.
+- 불변성은 부수효과의 발생을 방지하고 참조 투명성을 만족 시킨다.
+- 장점
+  - 모든 함수를 이미 알고 있는 하나의 결괏값으로 대체할수 있기 때문에 식을 쉽게 계산한다.
+  - 모든 곳에서 함수의 결괏값이 동일하기 때문에 식의 순서를 변경하더라도 각 식의 결과는 달라지지 않는다.
+
+객체지향 패러다임이 객체의 상태 변경이라는 부수효과를 기반으로 하기 때문에 참조 투명성은 예외에 가깝다.
+
+### 🔖 6.4.3 책임에 초점을 맞춰라
+
+디미터 법칙, 묻지 말고 시켜라, 의도를 드러내는 인터페이스, 명령과 쿼리를 분리 를 설계하는 아주쉬운 방법
+- 메시지를 먼저 선택하고 그 후에 메시지를 처리할 객체를 선택하는 것
+- 객체의 구현 이전에 객체 사이의 협력에 초점을 맞추고 협력 방식을 단순하고 유연하게 만드는것이다.
+
+메시지를 먼저 성택하는 방식이 미치는 긍정적인 영향
+
+- 디미터 법칙
+  - 협력이라는 컨텍스트 안에서 메시지를 먼저 결정하면 두 객체 사이의 결합도를 낮출수 있다.
+- 묻지 말고 시켜라
+  - 메시지를 먼저 선택하면 협력을 구조화 하게 된다.
+  - 메시지를 선택하기 때문에 필요한 정보를 물을 필요 없이 원하는 것을 표현한 메시지를 전송만 하면된다.
+- 의도를 드러내는 인터페이스
+  - 메시지를 먼저 선택하는건 메시지를 전송하는 클라이언트의 관점에서 메시지의 이름을 정한다는것
+  - 당연히 그 이름에는 클라이언트가 무엇을 원하는지 그 의도가 분명히 드러나게 된다.
+- 명령-쿼리 분리 원칙
+  - 메시지를 먼저 선택한다는것은 협력이라는 문맥안에서 객체의 인터페이스에 관해 고민한다는것을 의미
+  - 객체가 단순히 어떤 일을 해야 하는지뿐만 아니라 협력 속에서 객체의 상태를 예측하고 이해하기 쉽게 만들기 위한방법을 고민
+  - 예측 가능한 협력을 만들기 위해 명려과 쿼리를 분리하게 된다.
+
