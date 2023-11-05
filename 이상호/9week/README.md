@@ -25,7 +25,7 @@
 
 #### 컴파일타임 의존성을 고정시키고 런타임 의존성을 변경하라
 
-(그림 283)
+![9.1](imges/../images/9.1.jpg)
 
 - 컴파일타임 의존성과 런타임 의존성이 동일하지 않다.
 
@@ -178,13 +178,13 @@ public class Movie {
 
 #### 의존성 역전 원칙과 패키지
 
-(그림 303)
+![9.1](imges/../images/9.9.jpg)
 
 - Movie 가 DiscountPolicy 에 의존
 - DiscountPolicy 가 포함돼 있는 패키지 안에 AmountDiscountPolicy 클래스와 PercentDiscountPolicy 클래스가 포함돼 있다는 것
 - DiscountPolicy 클래스에 의존하기 위해서는 반드시 같은 패키지에 포함된 AmountDiscountPolicy 클래스와 PercentDiscountPolicy 클래스도 함께 존재해야 한다는 것을 의미
 
-(그림 304)
+![9.1](imges/../images/9.10.jpg)
 
 - 추상화를 별도의 독립적인 패키지가 아니라 클라이언트가 속한 패키지에 포함시켜야 한다.
 - 함께 재사용될 필요가 없는 클래스들은 별도의 독립적인 패키지에 모아야 한다. 
